@@ -23,9 +23,13 @@ app.post("/apply", (req, res) => {
 
 // ================= PAY =================
 app.post("/pay", async (req, res) => {
-  const { phone, amount } = req.body;
+  let { phone, amount } = req.body;
 
-  console.log("📲 PAYMENT REQUEST:", phone, amount);
+  // ✅ FORCE CLEAN VALUES
+  const cleanPhone = String(phone).trim();
+  const cleanAmount = Number(amount); // 🔥 VERY IMPORTANT FIX
+
+  console.log("📲 PAYMENT REQUEST:", cleanPhone, cleanAmount);
 
   const auth = Buffer.from(
     process.env.PAYHERO_USERNAME + ":" + process.env.PAYHERO_PASSWORD
@@ -40,9 +44,9 @@ app.post("/pay", async (req, res) => {
       },
       body: JSON.stringify({
         channel_id: process.env.PAYHERO_CHANNEL_ID,
-        phone_number: phone,
-        amount: amount,
-        provider: "m-pesa", // ✅ FIXED HERE
+        provider: "m-pesa", // ✅ REQUIRED
+        phone_number: cleanPhone,
+        amount: cleanAmount, // ✅ NOW NUMBER
         account_reference: "Elite Global Careers",
         transaction_desc: "Application Fee",
         callback_url: "https://jobs-abroad-r8k0.onrender.com/callback"
