@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -9,9 +10,10 @@ app.get("/", (req, res) => {
   res.send("Elite Backend Running 🚀");
 });
 
+// ================= APPLY =================
 app.post("/apply", (req, res) => {
   const data = req.body;
-  console.log("Application Received:", data);
+  console.log("📄 Application Received:", data);
 
   res.json({
     success: true,
@@ -19,12 +21,15 @@ app.post("/apply", (req, res) => {
   });
 });
 
+// ================= PAY =================
 app.post("/pay", async (req, res) => {
   const { phone, amount } = req.body;
 
+  console.log("📲 PAYMENT REQUEST:", phone, amount);
+
   const auth = Buffer.from(
-  process.env.PAYHERO_USERNAME + ":" + process.env.PAYHERO_PASSWORD
-).toString("base64");
+    process.env.PAYHERO_USERNAME + ":" + process.env.PAYHERO_PASSWORD
+  ).toString("base64");
 
   try {
     const response = await fetch("https://backend.payhero.co.ke/api/v2/payments", {
@@ -38,22 +43,26 @@ app.post("/pay", async (req, res) => {
         phone_number: phone,
         amount: amount,
         account_reference: "Elite Global Careers",
-        transaction_desc: "Job Application Payment",
+        transaction_desc: "Application Fee",
         callback_url: "https://jobs-abroad-r8k0.onrender.com/callback"
       })
     });
 
     const data = await response.json();
+
+    console.log("💰 PAYHERO RESPONSE:", data);
+
     res.json(data);
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ ERROR:", error);
     res.status(500).json({ error: "Payment failed" });
   }
 });
 
+// ================= CALLBACK =================
 app.post("/callback", (req, res) => {
-  console.log("PAYMENT CALLBACK:", req.body);
+  console.log("📥 CALLBACK RECEIVED:", req.body);
 
   if (req.body.status === "SUCCESS") {
     console.log("✅ Payment Successful");
@@ -63,8 +72,10 @@ app.post("/callback", (req, res) => {
 
   res.sendStatus(200);
 });
+
+// ================= START SERVER =================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("🚀 Server running on port " + PORT);
 });
