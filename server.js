@@ -42,6 +42,7 @@ app.post("/pay", async (req, res) => {
         channel_id: process.env.PAYHERO_CHANNEL_ID,
         phone_number: phone,
         amount: amount,
+        provider: "m-pesa", // ✅ FIXED HERE
         account_reference: "Elite Global Careers",
         transaction_desc: "Application Fee",
         callback_url: "https://jobs-abroad-r8k0.onrender.com/callback"
