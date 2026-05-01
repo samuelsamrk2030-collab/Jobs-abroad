@@ -26,7 +26,11 @@ app.post("/pay", async (req, res) => {
   let { phone, amount } = req.body;
 
   // ✅ FORCE CLEAN VALUES
-  const cleanPhone = String(phone).trim();
+  let cleanPhone = String(phone).trim();
+
+if (cleanPhone.startsWith('254')) {
+  cleanPhone = '+' + cleanPhone;
+}
   const cleanAmount = Number(amount); // 🔥 VERY IMPORTANT FIX
 
   console.log("📲 PAYMENT REQUEST:", cleanPhone, cleanAmount);
@@ -53,15 +57,27 @@ app.post("/pay", async (req, res) => {
       })
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+  const text = await response.text();
+  console.error("PAYHERO ERROR:", text);
+  return res.status(500).json({ success: false, error: text });
+}
+
+const data = await response.json();
 
     console.log("💰 PAYHERO RESPONSE:", data);
 
-    res.json(data);
+    res.json({
+  success: true,
+  data: data
+});
 
   } catch (error) {
     console.error("❌ ERROR:", error);
-    res.status(500).json({ error: "Payment failed" });
+    res.status(500).json({
+  success: false,
+  error: error.message
+});
   }
 });
 
